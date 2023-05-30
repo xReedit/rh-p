@@ -5,10 +5,10 @@ const config: UserConfig = {
 	plugins: [
 		sveltekit()
 	],
-	// test: {
-	// 	include: ['src/**/*.{test,spec}.{js,ts}']
-	// },
-	// define: { 'process.env': {} }
+	test: {
+		include: ['src/**/*.{test,spec}.{js,ts}']
+	},
+	define: { 'process.env': {} }
 };
 
 export default config;
