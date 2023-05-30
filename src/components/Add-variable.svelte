@@ -138,15 +138,15 @@
                 </label>
 
                 <fieldset>                  
-                    <label>Tipo de valor</label>
-                    <legend class="sr-only">Countries</legend>
+                    <label>Tipo de valor
 
-                    <div class="flex items-center mb-1">
-                        <input id="country-option-1" type="radio" name="countries" value="USA" class="w-4 h-4 border-gray-300 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 dark:focus:bg-blue-600 dark:bg-gray-700 dark:border-gray-600" checked = {rowItem.porcentaje === '1'} on:click={() => changeInputRadio(1)}>
-                        <label for="country-option-1" class="block ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                        Porcentaje
-                        </label>                        
-                    </div>
+                      <div class="flex items-center mb-1">
+                          <input id="country-option-1" type="radio" name="countries" value="USA" class="w-4 h-4 border-gray-300 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 dark:focus:bg-blue-600 dark:bg-gray-700 dark:border-gray-600" checked = {rowItem.porcentaje === '1'} on:click={() => changeInputRadio(1)}>
+                          <label for="country-option-1" class="block ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                          Porcentaje
+                          </label>                        
+                      </div>
+                    </label>
 
                     <div class="flex items-center mb-1">
                         <input id="country-option-2" type="radio" name="countries" value="Germany" class="w-4 h-4 border-gray-300 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 dark:focus:bg-blue-600 dark:bg-gray-700 dark:border-gray-600" checked = {rowItem.porcentaje === '0'} on:click={() => changeInputRadio(2)}>
