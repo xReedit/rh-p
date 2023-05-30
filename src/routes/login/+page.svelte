@@ -6,7 +6,7 @@
 
     let user = $page.url.searchParams.get('us')        
     // const idSedeRestobar = JSON.parse(user).sede.idsede_restobar
-    user = atob(user, 'base64')
+    user = atob(user)
     // console.log('user', user)
 
     onMount(async () => {            
