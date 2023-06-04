@@ -8,6 +8,7 @@
     import ListVariable from '$root/components/List-Variable.svelte';
 	import { paramsSwalAlert, showAlertSwalHtmlDecision } from '$root/services/mi.swal';
 	import { formatCurrency, getNomPerido, removeComaNum } from '$root/services/utils';	
+	import Preload from '$root/components/Preload.svelte';
 	
 
 
@@ -35,6 +36,7 @@
     let planillaCerrada = false
     let showPrintPdf = false
     let dataSedePrincipal: any = {}
+    let isPreloadShow = false
 
     onMount(async () => {
         idOrg = getValueToken('idorg') 
@@ -44,11 +46,16 @@
 
         periodo = periodo +'-01' // el primer dia
 
+        isPreloadShow = true
         await getDataSedePrincipal()
         await getDatosBoleta();
-        addRowSueldoBasicoMensual()
-        getListVariables()
+        await addRowSueldoBasicoMensual()
+        await getListVariables()
         getDatosPlanilla()
+
+        setTimeout(() => {            
+            isPreloadShow = false;
+        }, 1000);
     })
 
     async function getDataSedePrincipal() {
@@ -61,13 +68,13 @@
         dataPlanilla_periodo = _data ? _data[0] : null
         
         btnEnvioEnabled = false
+        idplanilla_perido = null
         if (dataPlanilla_periodo) {
             btnEnvioEnabled = true
             idplanilla_perido = dataPlanilla_periodo.idplanilla_periodo
-            observacionesCierre = dataPlanilla_periodo.observaciones
+            observacionesCierre = dataPlanilla_periodo.observaciones            
         }
 
-        idplanilla_perido = dataPlanilla_periodo.idplanilla_periodo || null  
         planillaCerrada = idplanilla_perido === null ? false : dataPlanilla_periodo.cerrado === '1'
     }
 
@@ -298,6 +305,7 @@
     
 </script>
 <div class="p-5" in:fly="{{ x: 200, duration: 200 }}">  
+    <Preload isLoading = {isPreloadShow}/>
     <div class="pb-5 flex justify-between items-start">    
         <div>
             <h1 class="text-xl">Boleta de Pago</h1>

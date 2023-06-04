@@ -1,7 +1,7 @@
 <script lang="ts">
   import Button from '$root/components/Button.svelte'
   import { goto } from "$app/navigation";   
-  import { postData, getData, putData } from '$root/services/httpClient.services'
+  import { postData, getData, putData, postDataJSON } from '$root/services/httpClient.services'
   import { convertValuesUpperCase } from '$root/services/utils';
   import { fly } from 'svelte/transition'
 	import { onMount } from 'svelte';
@@ -34,6 +34,7 @@
 
   onMount(async () => {           
     id = $page.url.searchParams.get('id') 
+    setStorageIdColaborardor()
     if (id){
       const _data = await getData('colaborador',`byId/${id}`) 
       data = _data ? _data[0] : data
@@ -53,11 +54,17 @@
     _loaderStatus = 1
 
     const rpt = isNewRegister ?
-                    await postData('colaborador', 'create', _payload)
+                    await postDataJSON('colaborador', 'create', _payload)
                     : await putData('colaborador', `update/${id}`, _payload)
 
-    if (rpt.status === 200) {            
+    if (rpt.status === 200 || rpt.idcolaborador) {            
       setTimeout(() => {
+            // $page.url.searchParams.set('id',rpt.idcolaborador)            
+            if (rpt.idcolaborador ) {              
+              id = rpt.idcolaborador;
+              setStorageIdColaborardor()
+            }
+
             _loaderStatus = 2            
             showToastSwal('success','Se guardo correctamente')   
             setTimeout(() => {_loaderStatus = 0},1000)
@@ -66,6 +73,10 @@
       console.error(rpt)
     }
   };
+
+  function setStorageIdColaborardor() {
+    localStorage.setItem('sys::id', id);
+  }
     
  
 </script>

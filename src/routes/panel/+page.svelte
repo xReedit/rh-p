@@ -2,15 +2,19 @@
     import { onMount } from 'svelte';
     import { isLogin } from '$root/services/login.services'    
     import { fade } from 'svelte/transition'
+    import Preload from '$root/components/Preload.svelte';
     
+    let isPreloadShow = true;
 
     onMount(async () => {        
-        isLogin()
+        await isLogin()
+        isPreloadShow = false;        
     })
 
 </script>
 
 <div in:fade class="max-w-2xl m-auto p-5 text-center flex justify-center items-start flex-wrap">    
+    <Preload isLoading = {isPreloadShow}/>
 
     <a href="../panel/empleados/list" class="w-60 border-2 rounded-lg m-2 p-3 text-left hover:shadow hover:bg-slate-50 cursor-pointer">
         <div class="flex items-center">

@@ -14,7 +14,7 @@
 
 
     const pagination = {
-        limit: 5
+        limit: 10
     }
 
     onMount(async () => {        

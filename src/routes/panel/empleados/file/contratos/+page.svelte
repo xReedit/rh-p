@@ -10,6 +10,7 @@
 	import { showToastSwal } from '$root/services/mi.swal';
   import AutoComplete from "simple-svelte-autocomplete"
 	import { getSeletecDataValue } from '$root/services/selected.service';
+  import Preload from '$root/components/Preload.svelte';
 	
 
     let dias_semana = [{'id': 1, 'nombre': 'Lunes'},{'id': 2, 'nombre': 'Martes'},{'id': 3, 'nombre': 'Miércoles'},{'id': 4, 'nombre': 'Jueves'},{'id': 5, 'nombre': 'Viernes'},{'id': 6, 'nombre': 'Sábado'},{'id': 7, 'nombre': 'Domingo'}]
@@ -34,15 +35,20 @@
     let selectedSedeTrabajo = {}
     let selectedEquipo = {}
     let selectedUnidad = {}
+    let isPreloadShow = false;
 
-    onMount(async () => {        
+    onMount(async () => {    
+        isPreloadShow = true;    
         idOrg = getValueToken('idorg')        
         idSede = getValueToken('idsede')
         listLocal = await getData('sede',`byIdorg/${idOrg}`)        
         listRol = await getData('rol',`byIdsede/${idSede}`)   
         listAra = await getData('area',`byIdsede/${idSede}`)
         listTipoContrato = await getData('tipo-contrato','all')
-        getContratos();             
+        await getContratos();             
+        setTimeout(() => {            
+            isPreloadShow = false;
+        }, 1000);
     })
 
     function checkDiaList() {
@@ -53,7 +59,7 @@
 
 
     async function getContratos() {
-      idColaborador = $page.url.searchParams.get('id')
+      idColaborador = $page.url.searchParams.get('id') || localStorage.getItem('sys::id');
       listContratos = await getData('colaborador-contrato',`byIdColaborador/${idColaborador}`)      
 
 
@@ -232,6 +238,7 @@
 </script>
 
 <div class="m-5" in:fly="{{ x: 200, duration: 200 }}">
+    <Preload isLoading = {isPreloadShow}/>
     
     <!-- lista de contratos -->
     <div class="flex items-center">

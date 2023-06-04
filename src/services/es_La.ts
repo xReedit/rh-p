@@ -9,6 +9,7 @@ export const es_La = {
         'results': () => '',
         'of': 'de',
         'to': 'al',
+        'limit': 10,
     },
     loading: 'Cargando...',
     noRecordsFound: 'No se encontro Registros',
