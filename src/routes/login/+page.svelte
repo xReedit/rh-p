@@ -7,11 +7,12 @@
     let user = $page.url.searchParams.get('us')        
     // const idSedeRestobar = JSON.parse(user).sede.idsede_restobar
     user = atob(user)
-    // console.log('user', user)
+    // console.log(user.toString())
 
     onMount(async () => {            
       const rpt = await loginRestobar(user)            
-
+      
+      debugger
       if (rpt.status === 200) {
             const { token } = await rpt.json();
             localStorage.setItem('token', token);

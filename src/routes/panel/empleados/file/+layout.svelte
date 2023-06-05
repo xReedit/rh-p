@@ -1,15 +1,25 @@
 <script lang="ts">
 	import { page } from "$app/stores";
-	import { debug, onMount } from "svelte/internal";
+	import { debug, onMount } from "svelte/internal";    
+    import { goto } from '$app/navigation';
+    import {IdColaboradorEdit} from '$root/Store';
 
     let idColaborador: any;
     let _urlWithId = ''
     let urlDatos = ''
-    let urlContratos = ''
-
+    let urlContratos = ''    
+    
+    
     onMount(async () => {
         idColaborador = $page.url.searchParams.get('id')         
-        _urlWithId = idColaborador ? `?id=${idColaborador}` : ''        
+        _urlWithId = idColaborador ? `?id=${idColaborador}` : ''   
+
+        IdColaboradorEdit.subscribe((id) => {    
+            // dataTitle = titleModal[id - 1]
+            idColaborador = id;
+        })
+        
+        console.log('idColaborador', idColaborador);
 
         urlDatos = `./datos${_urlWithId}`
         urlContratos = `./contratos${_urlWithId}`
@@ -19,6 +29,13 @@
         const listElements = event.target.parentNode.parentNode.querySelectorAll('a')        
         listElements.forEach(e => e.classList.remove('active'));
         event.target.classList.add('active');        
+    }
+
+    function goContratos() {
+        if ( idColaborador === null ) {
+            return
+        }
+        goto(urlContratos)
     }
 </script>
 
@@ -35,8 +52,10 @@
                 </a>
             </li>
             <li>
-                <a href={urlContratos} on:click={activeTab}>
-                    <svg aria-hidden="true" class="w-5 h-5 mr-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>Contratos
+                <a href='#' on:click={goContratos}>
+                    <div class="flex">
+                        <svg aria-hidden="true" class="w-5 h-5 mr-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>Contratos
+                    </div>
                 </a>
             </li>
             <!-- <li>

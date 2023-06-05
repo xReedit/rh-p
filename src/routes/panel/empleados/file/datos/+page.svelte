@@ -7,9 +7,10 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { showToastSwal } from '$root/services/mi.swal';
+  import {IdColaboradorEdit} from '$root/Store';
 
   let _loaderStatus = 0
-  let id;
+  let id = null;
   let isNewRegister = true;
   let data= {
         "idcolaborador": "",
@@ -30,7 +31,8 @@
         "ciudad": '',
         "provincia": '',
         "apellidos":''
-    }
+    }    
+  
 
   onMount(async () => {           
     id = $page.url.searchParams.get('id') 
@@ -75,6 +77,11 @@
   };
 
   function setStorageIdColaborardor() {
+  //   if ( id ){
+  //     setContext('idcolaborador-edit-context', id)
+  // }
+
+    IdColaboradorEdit.set(id)
     localStorage.setItem('sys::id', id);
   }
     

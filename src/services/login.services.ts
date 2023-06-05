@@ -49,7 +49,7 @@ export const isLogin = async () => {
 export const getValueToken = (key: string): any => {
     // if (localStorage.getItem('token')) {
         const token = localStorage.getItem('token')?.split('.')[1];
-        const _data = JSON.parse(atob(token))
+        const _data = JSON.parse(atob(token))    
         if (_data[key] ){
             return _data[key]            
         } else {
