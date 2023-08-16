@@ -4,27 +4,6 @@
     import '$root/styles/micss.css';
     import Toolbar from '$root/components/Toolbar.svelte'       
 
-    // import { onMount } from "svelte";
-	  // import { goto } from "$app/navigation";   
-    // import { page } from '$app/stores'; 
-    // import { login } from '$root/services/login.services'
-
-    // let user = $page.url.searchParams.get('us')    
-    // user = atob(user)
-    // console.log('pahtUrl', user);
-
-    // onMount(async () => {
-      // console.log('aaa');
-    //   const rpt = await login(user)
-    //   console.log('rpt', rpt);
-
-    //   if (rpt.status === 200) {
-    //         const { token } = await rpt.json();
-    //         localStorage.setItem('token', token);                  
-    //         goto(`./panel`) // opciones
-    //   } 
-
-    // })  
 </script>
 
 <style lang="postcss">

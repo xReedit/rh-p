@@ -17,29 +17,66 @@
     }
 
     function fireEvent() {
-        itemSeleted.permanente = checkPermanente ? '1' : '0'
+        itemSeleted.permanente = checkPermanente ? '1' : '0'        
+        console.log('itemSeleted', itemSeleted);
         dispatch('getItem', {item: itemSeleted})
     }
 </script>
 
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="select_concepto">
+    Concepto
+</label>
 
-<select bind:value={itemSeleted} required>
+<select bind:value={itemSeleted} required id="select_concepto">
     {#each items as item}
         <option value="{item}">{item.descripcion}</option>
     {/each}
 </select>
 
+<!-- fecha de descuento -->
+<div class="">
+    <div>
+        <label class="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300" for="fecha_descuento">
+            Fecha de Registro
+        </label>
+        <input 
+            type="date" 
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" 
+            name="fecha_descuento" 
+            bind:value={itemSeleted.fecha_registro}
+            required />
+    </div>
+    <div>
+        <!-- motivo de registro -->
+        <label class="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300" for="motivo">
+            Observaciones
+        </label>
+        <input 
+            placeholder="Motivo de registro"
+            type="text" 
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" 
+            name="motivo" 
+            bind:value={itemSeleted.observaciones}
+            />
+    </div>
+</div>
+
 {#if itemSeleted.fijo}
 
     {#if itemSeleted.fijo === '1'}
+        <label class="mt-3 block text-sm font-medium text-gray-700 dark:text-gray-300" for="text_importe">
+            Importe
+        </label>
         <!-- <label>   -->
         <input 
             class="uppercase"
             type="number"
             name="descripcion"         
+            id="text_importe"
             bind:value={itemSeleted.valor}
             required />
         <!-- </label>   -->
+        <br>
         <p class="text-gray-500 mb-2">Indique un importe fijo</p>
 
         <hr>                

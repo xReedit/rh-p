@@ -86,10 +86,9 @@
         if (idColaborador){
             const _data = await getData('planilla',`colaborador-datos/${idColaborador}`)             
             dataColaborador = _data ? _data[0] : null            
-
-
+            
             dataBoleta = await getData('colaborador-boleta',`byIdColaborador/${idColaborador}/${periodo}`)             
-            dataBoleta = dataBoleta ? dataBoleta : []
+            dataBoleta = dataBoleta ? dataBoleta : []            
                      
 
             setListCorresponde();
@@ -100,7 +99,7 @@
     function setListCorresponde() {
         listIngresos = dataBoleta.filter(x => x.idtipo_variable === 1)
         listDescuentos = dataBoleta.filter(x => x.idtipo_variable === 2)
-        listAporte = dataBoleta.filter(x => x.idtipo_variable === 3)
+        listAporte = dataBoleta.filter(x => x.idtipo_variable === 3)        
         sumTotales();
     }
 
@@ -109,15 +108,17 @@
     async function addRowSueldoBasicoMensual(_rowAdd: any = {}) {
         // 42 = Sueldo basico mensual
         // let _rowAdd = {}
-        const _rowSBM = dataBoleta.find(x => x.idvariables === 42)
+        const _rowSBM = dataBoleta.find(x => x.idvariables === 42)        
         if ( !_rowSBM ) {            
             _rowAdd = {
                 idvariables: 42,
                 idcolaborador: parseInt(idColaborador),
                 f_add: new Date().toISOString().split('T')[0],
                 importe: removeComaNum(dataColaborador.suedo_basico).toString(),
-                permanente: '1'
+                permanente: '1',
+                periodo: periodo
             }
+            
 
             await postData('colaborador-boleta', 'create', _rowAdd)
             // addRowList(_rowAdd, 1)
@@ -141,32 +142,34 @@
     }
 
     async function saveRowItem(_rowAdd: any = {}) {
-        const _rowSBM = dataBoleta.find(x => x.idvariables === _rowAdd.idvariables)
+        // const _rowSBM = dataBoleta.find(x => x.idvariables === _rowAdd.idvariables)
 
-        if ( !_rowSBM ) {  
+        // if ( !_rowSBM ) {  
             _rowAdd = {
                 idvariables: _rowAdd.idvariables,
                 idcolaborador: parseInt(idColaborador),
                 f_add: new Date().toISOString().split('T')[0],
                 periodo: periodo,
                 importe: _rowAdd.importe_calculado.toString(),
-                permanente: _rowAdd.permanente
+                permanente: _rowAdd.permanente,
+                fecha_registro:_rowAdd.fecha_registro,
+                observaciones: _rowAdd.observaciones
             }
 
             await postData('colaborador-boleta', 'create', _rowAdd)        
             getDatosBoleta()
-        } else { // si existe comparamos el importe del sueldo sueldo
-            if ( _rowSBM.importe !==  _rowAdd.importe_calculado ) {
-                _rowAdd = { 
-                    periodo: periodo,                                                           
-                    importe: _rowAdd.importe_calculado,
-                    f_add: new Date().toISOString().split('T')[0]    
-                }
+        // } else { // si existe comparamos el importe del sueldo sueldo
+        //     if ( _rowSBM.importe !==  _rowAdd.importe_calculado ) {
+        //         _rowAdd = { 
+        //             periodo: periodo,                                                           
+        //             importe: _rowAdd.importe_calculado,
+        //             f_add: new Date().toISOString().split('T')[0]    
+        //         }
 
-                await putData('colaborador-boleta', `update/${_rowSBM.idcolaborador_boleta}`, _rowAdd)
-                _rowSBM.importe = _rowAdd.importe_calculado 
-            }            
-        }        
+        //         await putData('colaborador-boleta', `update/${_rowSBM.idcolaborador_boleta}`, _rowAdd)
+        //         _rowSBM.importe = _rowAdd.importe_calculado 
+        //     }            
+        // }        
     }
 
     function addRowList(rowItem: any = {}) {
@@ -454,7 +457,17 @@
                                     on:click={() => remove(item)}>
                                     <i class="fa fa-trash text-red-500"></i>
                                 </button>
-                                <p class="uppercase transition-all ease-in-out hover:-translate-x-1">{item.nom_variable}</p>
+                                <div>
+                                    <p class="uppercase transition-all ease-in-out hover:-translate-x-1">{item.nom_variable}</p>
+                                    {#if item.fecha_registro} 
+                                        <div class="flex">
+                                            <p class="text-gray-800 fs-10">{item.fecha_registro}</p>
+                                            {#if item.observaciones} 
+                                                <p class="text-gray-800 fs-10 ml-1">| {item.observaciones}</p>
+                                            {/if}
+                                        </div>
+                                    {/if}
+                                </div>
                             </div>                                              
                             <div>
                                 <p class="text-base font-semibold text-gray-900">{item.importe}</p>
