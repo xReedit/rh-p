@@ -134,13 +134,13 @@
     bg-red-600 hover:bg-red-700 focus:bg-red-700 text-white
     }
 
-    table {
+    table {           
       @apply
       w-full text-sm text-left text-gray-500 dark:text-gray-400
       relative overflow-x-auto shadow-inner sm:rounded-lg border-collapse border border-slate-200
     }
 
-    table thead {
+    table thead {      
       @apply
       text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-400
     }
@@ -150,14 +150,20 @@
       px-6 py-3
     }
 
-    table th {
+    table th {      
       @apply
       px-6 py-3
     }
 
+    
+
     table tr {
       @apply
       border-y
+    }
+
+    table tr:hover {      
+      background: #e1f5fe;
     }
 
     table tr>td {
@@ -219,7 +225,7 @@
     }
 
     .badge {
-      display: block;
+      /* display: block; */
       @apply
       text-xs mr-2 px-2.5 py-0.5 rounded
     }
@@ -267,7 +273,26 @@
 
 
 
-
+    .fs-9 { font-size: 9px;}
+    .fs-10 { font-size: 10px;}
+    .fs-11 { font-size: 11px;}
+    .fs-12 { font-size: 12px;}
+    .fs-13 { font-size: 13px;}
+    .fs-14 { font-size: 14px;}
+    .fs-15 { font-size: 15px;}
+    .fs-16 { font-size: 16px;}
+    .fs-17 { font-size: 17px;}
+    .fs-18 { font-size: 18px;}
+    .fs-19 { font-size: 19px;}
+    .fs-20 { font-size: 20px;}
+    .fs-21 { font-size: 21px;}
+    .fs-22 { font-size: 22px;}
+    .fs-23 { font-size: 23px;}
+    .fs-24 { font-size: 24px;}
+    .fs-25 { font-size: 25px;}
+    .fw-600 { 
+      font-weight: 600;
+    }
 
 
 

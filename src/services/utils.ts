@@ -1,3 +1,7 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import * as ExcelJS from 'exceljs';
+
 export const inputConMayusculas = (field: any) => { 
     field.target.value = field.target.value.toUpperCase()
 }
@@ -73,3 +77,51 @@ export function imprimirHTML(html: string): void {
         console.error('No se pudo abrir la ventana de impresión.');
     }
 }
+
+export function exportTableToExcel(tableId: string, filename: string) {
+    const table = document.getElementById(tableId);
+    if (!table) {
+        console.error(`Table with ID "${tableId}" not found.`);
+        return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sheet 1');
+
+    // Agregar encabezados
+    const headerRow = table.getElementsByTagName('thead')[0].getElementsByTagName('tr')[0];
+    const headerCells = headerRow.getElementsByTagName('th');
+    const headerData = [];
+    for (const cell of headerCells) {
+        headerData.push(cell.innerText);
+    }
+    worksheet.addRow(headerData);
+
+    // Agregar datos de las filas
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    for (const row of rows) {
+        const cells = row.getElementsByTagName('td');
+        const rowData = [];
+        for (const cell of cells) {
+            rowData.push(cell.innerText);
+        }
+        worksheet.addRow(rowData);
+    }
+
+    workbook.xlsx.writeBuffer()
+        .then(buffer => {
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${filename}.xlsx`;
+            a.click();
+            URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Error exporting table:', error);
+        });
+}
+
+
+

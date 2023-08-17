@@ -38,9 +38,10 @@
 	"type": "module",
 	"dependencies": {
 		"animate.css": "^4.1.1",
+		"exceljs": "^4.3.0",
 		"gridjs": "^6.0.6",
 		"gridjs-svelte": "^2.1.1",
-		"simple-svelte-autocomplete": "^2.5.2",		
+		"simple-svelte-autocomplete": "^2.5.2",
 		"sweetalert2": "^11.7.3"
 	}
 }

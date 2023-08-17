@@ -48,6 +48,7 @@
 
         isPreloadShow = true
         await getDataSedePrincipal()
+        await getDataBoletaGenerales()
         await getDatosBoleta();
         await addRowSueldoBasicoMensual()
         await getListVariables()
@@ -84,8 +85,8 @@
 
     async function getDatosBoleta() {
         if (idColaborador){
-            const _data = await getData('planilla',`colaborador-datos/${idColaborador}`)             
-            dataColaborador = _data ? _data[0] : null            
+            // const _data = await getData('planilla',`colaborador-datos/${idColaborador}`)             
+            // dataColaborador = _data ? _data[0] : null            
             
             dataBoleta = await getData('colaborador-boleta',`byIdColaborador/${idColaborador}/${periodo}`)             
             dataBoleta = dataBoleta ? dataBoleta : []            
@@ -94,6 +95,19 @@
             setListCorresponde();
         }
         
+    }
+
+    async function getDataBoletaGenerales() {
+        if (idColaborador){
+            const _data = await getData('planilla',`colaborador-datos/${idColaborador}`)             
+            dataColaborador = _data ? _data[0] : null            
+            
+            // dataBoleta = await getData('colaborador-boleta',`byIdColaborador/${idColaborador}/${periodo}`)             
+            // dataBoleta = dataBoleta ? dataBoleta : []            
+                     
+
+            // setListCorresponde();
+        }
     }
 
     function setListCorresponde() {
@@ -123,7 +137,7 @@
             await postData('colaborador-boleta', 'create', _rowAdd)
             // addRowList(_rowAdd, 1)
             getDatosBoleta()
-
+            
         } else { // si existe comparamos el importe del sueldo sueldo
             if ( _rowSBM.importe !==  dataColaborador.suedo_basico ) {
                 _rowAdd = {                                                            
@@ -461,9 +475,9 @@
                                     <p class="uppercase transition-all ease-in-out hover:-translate-x-1">{item.nom_variable}</p>
                                     {#if item.fecha_registro} 
                                         <div class="flex">
-                                            <p class="text-gray-800 fs-10">{item.fecha_registro}</p>
+                                            <p class="text-gray-500">{item.fecha_registro}</p>
                                             {#if item.observaciones} 
-                                                <p class="text-gray-800 fs-10 ml-1">| {item.observaciones}</p>
+                                                <p class="text-gray-500 ml-1">| {item.observaciones}</p>
                                             {/if}
                                         </div>
                                     {/if}
