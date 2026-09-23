@@ -2,7 +2,16 @@
 @tailwind base;
 
 @layer base {
-    input, textarea {
+    /* Los radios y checkboxes quedan FUERA de esta regla.
+       Heredaban `block w-full`, asi que cada uno se estiraba al ancho del
+       formulario y empujaba su etiqueta al otro extremo de la pantalla. El
+       proyecto lo venia tapando con la clase .checkbox-1 elemento por
+       elemento; el que se olvidaba de ponerla se llevaba el dialogo roto.
+
+       Va con :where() y no con :not() a secas: :not() suma especificidad y la
+       regla pasaria a ganarle a las utilidades de Tailwind, con lo que un
+       `w-20` en un input dejaria de angostarlo. :where() no aporta ninguna. */
+    input:where(:not([type="radio"]):not([type="checkbox"])), textarea {
         @apply                 
         block
         w-full
@@ -56,6 +65,18 @@
       dark:text-white
       dark:focus:ring-blue-500
       dark:focus:border-blue-500
+    }
+
+    input[type="radio"], input[type="checkbox"] {
+        @apply w-4 h-4 m-0 shrink-0 cursor-pointer accent-sky-600;
+    }
+
+    /* Un boton que tiene que verse como un enlace.
+       La regla global de `button` le pone borde, padding y sombra a TODO boton,
+       asi que sin esto una accion secundaria ("usar el mismo horario en todos
+       los dias") se dibuja como una tarjeta y compite con el boton de guardar. */
+    .btn-link {
+        @apply p-0 border-0 shadow-none bg-transparent font-normal text-left;
     }
 
     .checkbox-1{
