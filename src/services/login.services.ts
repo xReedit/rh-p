@@ -56,7 +56,4 @@ export const getValueToken = (key: string): any => {
             console.log(`token key ${key} not exist`, _data);
             return false
         }        
-    // } else {
-    //     return false
-    // }
 }

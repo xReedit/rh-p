@@ -155,6 +155,9 @@
                 <label class="font-light text-sm text-gray-600" for="month-periodo">Seleccione Periodo:</label>
                 <input type="month" id="month-periodo" bind:value={dateNowPeriodo} on:change={changeDatePeriodo}>
             </div>
+            <a class="mt-1 inline-block text-xs text-sky-600 hover:underline" href="/panel/planilla/configuracion">
+                <i class="fa-solid fa-gear"></i> Configuracion de planilla
+            </a>
         </div>
         <div class="flex flex-wrap justify-end text-right">
             <div class="flex">

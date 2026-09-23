@@ -3,6 +3,7 @@
     import { isLogin } from '$root/services/login.services'    
     import { fade } from 'svelte/transition'
     import Preload from '$root/components/Preload.svelte';
+    import AlertaAusencias from '$root/components/AlertaAusencias.svelte';
     
     let isPreloadShow = true;
 
@@ -15,6 +16,8 @@
 
 <div in:fade class="max-w-2xl m-auto p-5 text-center">    
     <Preload isLoading = {isPreloadShow}/>
+
+    <AlertaAusencias invitar />
 
     <div class="pb-5">
         <p class="text-bold text-xl">Gestión de Recursos Humanos</p>
@@ -83,7 +86,19 @@
             </div>
             <p class="font-light text-sm">Sucursales o sedes de trabajo.</p>
         </a>
-            
+
+        <!-- Las marcas las toma el POS (modulo Control de Asistencia); aqui se
+             leen para la planilla: tardanzas, faltas y horas del periodo. -->
+        <a href="../panel/asistencia" class="w-60 border-2 rounded-lg m-2 p-3 text-left hover:shadow hover:bg-slate-50 cursor-pointer">
+            <div class="flex items-center">
+                <div class="bg-rose-400 p-1 rounded text-center mr-1">
+                        <i class="fa-solid fa-clock"></i>
+                </div>
+                <p class="title font-medium">Control de Asistencia</p>
+            </div>
+            <p class="font-light text-sm">Tardanzas, faltas y horas trabajadas. Lo que necesita la boleta de pago.</p>
+        </a>
+
     </div>
     
 </div>

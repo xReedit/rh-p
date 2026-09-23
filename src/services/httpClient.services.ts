@@ -72,3 +72,17 @@ export const putData = async (controller: string, event: string, payload: any = 
         body: payload ? JSON.stringify(payload) : payload
     })
 }
+
+// export function delete apirest
+export const deleteData = async (controller: string, event: string) => {
+    const url = `${PUBLIC_API_KEY}/${controller}/${event}`
+    const token = localStorage.getItem('token')
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    }
+    return await fetch(url, {
+        method: 'DELETE',
+        headers
+    })
+}
