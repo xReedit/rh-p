@@ -17,7 +17,7 @@
     import { goto } from '$app/navigation';
     import { fade } from 'svelte/transition';
     import { getData, putData, postDataJSON } from '$root/services/httpClient.services';
-    import Preload from '$root/components/Preload.svelte';
+    import Preload from '$root/components/Preload.svelte';
     const DIAS = ['lun', 'mar', 'mie', 'jue', 'vie', 'sab', 'dom'] as const;
     const DIAS_TXT: Record<string, string> = {
         lun: 'Lunes', mar: 'Martes', mie: 'Miercoles', jue: 'Jueves',
@@ -89,6 +89,8 @@
     let grid = gridVacio();
     let brk: Break = { hay: false, ini: '15:00', fin: '18:00' };
     let tolerancia = 10;
+    /** '' = sin area. Se manda siempre, asi tambien se puede quitar. */
+    let areaSel: string = '';
     let guardando = false;
 
     // --- horario para varios ---
@@ -192,6 +194,7 @@
     function abrir(c: any) {
         editando = c;
         tolerancia = c.tolerancia_min ?? 10;
+        areaSel = c.idarea ? String(c.idarea) : '';
         grid = gridVacio(c.horario_semanal);
         brk = breakDe(c.horario_semanal);
         aviso = '';
@@ -219,7 +222,8 @@
             try {
                 const resp = await putData('asistencia-rrhh', `personal/${editando.idcolaborador}/horario`, {
                     horario_semanal: leido.vacio ? null : leido.horario,
-                    tolerancia_min: Number(tolerancia)
+                    tolerancia_min: Number(tolerancia),
+                    idarea: areaSel === '' ? null : Number(areaSel)
                 });
                 const r = await resp.json();
                 if (!r?.success) { throw new Error(r?.error || 'No se pudo guardar'); }
@@ -405,6 +409,23 @@
                 {#if error}
                     <div class="mb-3 rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-800">{error}</div>
                 {/if}
+
+                <!-- El area va arriba y no abajo: es "quien es esta persona",
+                     y los dias son el grueso de la pantalla. -->
+                <div class="mb-3 border-b pb-3">
+                    <label class="flex items-center gap-2 text-sm">
+                        <span class="w-32">Area</span>
+                        <select bind:value={areaSel} class="flex-1 rounded-md border px-2 py-1 text-sm">
+                            <option value="">Sin area</option>
+                            {#each areas as a}
+                                <option value={String(a.idarea)}>{a.descripcion}</option>
+                            {/each}
+                        </select>
+                    </label>
+                    <p class="mt-1 pl-[8.5rem] text-[11px] text-neutral-500">
+                        Agrupa a la gente en los reportes y en el costo de personal.
+                    </p>
+                </div>
 
                 {#each DIAS as d}
                     <div class="flex items-center gap-3 border-b py-2 last:border-0">
