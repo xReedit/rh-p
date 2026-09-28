@@ -1,4 +1,7 @@
-import adapter from '@sveltejs/adapter-auto';
+// Vercel directo, no `adapter-auto`: auto bajaba una version vieja del
+// adaptador que solo conoce Node 16 y 18, y el build de Vercel ya corre en
+// Node 22. Resultado: "Unsupported Node.js version: v22".
+import adapter from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/kit/vite';
 import preprocess from 'svelte-preprocess';
 
@@ -8,7 +11,9 @@ const config = {
 	// for more information about preprocessors	
 	// preprocess: preprocess(),
 	kit: {
-		adapter: adapter(),
+		// El runtime va explicito: sin esto el adaptador lo adivina del Node
+		// que corre el build, y si Vercel lo cambia el deploy se cae solo.
+		adapter: adapter({ runtime: 'nodejs22.x' }),
 		alias: {
 			$root: 'src'
 		}
