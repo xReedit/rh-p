@@ -55,15 +55,30 @@ export function primeraLetraMayuscula(cadena: string): string {
     return cadena.charAt(0).toUpperCase() + cadena.slice(1);
 }
 
+/**
+ * "2026-09" -> "Setiembre 2026". Es lo que se imprime en la boleta.
+ *
+ * Tolera que no llegue nada: la boleta se abre con el periodo en la URL, y
+ * entrar sin el -- un F5, un enlace viejo -- rompia la pantalla entera antes de
+ * dibujar nada.
+ */
 export function getNomPerido(periodo): string {
-    const mm = periodo.split('-')
-    return `${getNomMes(mm[1])} ${mm[0]}`
+    const partes = String(periodo || '').split('-')
+    if (partes.length < 2) { return '' }
+    return `${getNomMes(partes[1])} ${partes[0]}`
 }
 
 
 function getNomMes(mm): string {
-    const _listMes = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre']
-    return _listMes[mm - 1]
+    // OJO: a esta lista le faltaba AGOSTO.
+    //
+    // Al no estar, todos los meses de agosto en adelante se corrian un lugar:
+    // una boleta de agosto decia "Setiembre", la de setiembre "Octubre", y la
+    // de diciembre salia "undefined". En un documento que se le entrega
+    // firmado al trabajador.
+    const _listMes = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                      'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre']
+    return _listMes[mm - 1] || ''
 }
 
 export function imprimirHTML(html: string): void {

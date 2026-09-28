@@ -1,8 +1,27 @@
 import { PUBLIC_API_KEY } from '$env/static/public'
+import { sedeParaPedido } from './sede.store'
+
+/**
+ * Arma la URL agregando la sede elegida cuando corresponde.
+ *
+ * Solo para `asistencia-rrhh`: es el unico modulo que trabaja sobre varios
+ * locales. El servidor igual verifica que la sede sea de la empresa del token,
+ * asi que esto es comodidad, no permiso.
+ */
+const armarUrl = (controller: string, event: string) => {
+    const base = `${PUBLIC_API_KEY}/${controller}/${event}`
+    if (controller !== 'asistencia-rrhh') { return base }
+
+    const idsede = sedeParaPedido()
+    if (!idsede) { return base }
+
+    return base + (base.includes('?') ? '&' : '?') + 'idsede=' + idsede
+}
+
 
 // export function get apirest
 export const getData = async (controller: string, event: string, payload: any = null) => {
-    const url = `${PUBLIC_API_KEY}/${controller}/${event}`
+    const url = armarUrl(controller, event)
     const token = localStorage.getItem('token')
     const headers = {
         'Content-Type': 'application/json',
@@ -28,7 +47,7 @@ export const getData = async (controller: string, event: string, payload: any = 
 
 // export function post apirest
 export const postData = async (controller: string, event: string, payload: any) => {
-    const url = `${PUBLIC_API_KEY}/${controller}/${event}`
+    const url = armarUrl(controller, event)
     const token = localStorage.getItem('token')
     const headers = {
         'Content-Type': 'application/json',
@@ -43,7 +62,7 @@ export const postData = async (controller: string, event: string, payload: any) 
 }
 
 export const postDataJSON = async (controller: string, event: string, payload: any) => {
-    const url = `${PUBLIC_API_KEY}/${controller}/${event}`
+    const url = armarUrl(controller, event)
     const token = localStorage.getItem('token')
     const headers = {
         'Content-Type': 'application/json',
@@ -60,7 +79,7 @@ export const postDataJSON = async (controller: string, event: string, payload: a
 
 // export function put apirest
 export const putData = async (controller: string, event: string, payload: any = null) => {
-    const url = `${PUBLIC_API_KEY}/${controller}/${event}`
+    const url = armarUrl(controller, event)
     const token = localStorage.getItem('token')
     const headers = {
         'Content-Type': 'application/json',
@@ -75,7 +94,7 @@ export const putData = async (controller: string, event: string, payload: any = 
 
 // export function delete apirest
 export const deleteData = async (controller: string, event: string) => {
-    const url = `${PUBLIC_API_KEY}/${controller}/${event}`
+    const url = armarUrl(controller, event)
     const token = localStorage.getItem('token')
     const headers = {
         'Content-Type': 'application/json',

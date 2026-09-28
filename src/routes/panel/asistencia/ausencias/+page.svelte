@@ -12,8 +12,7 @@
     import { goto } from '$app/navigation';
     import { fade } from 'svelte/transition';
     import { getData, postDataJSON } from '$root/services/httpClient.services';
-    import Preload from '$root/components/Preload.svelte';
-
+    import Preload from '$root/components/Preload.svelte';
     const CATEGORIAS = [
         { v: 'VACACIONES', t: 'Vacaciones', paga: true },
         { v: 'DESCANSO_MEDICO', t: 'Descanso medico', paga: true },

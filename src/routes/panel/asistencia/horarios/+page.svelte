@@ -17,20 +17,58 @@
     import { goto } from '$app/navigation';
     import { fade } from 'svelte/transition';
     import { getData, putData, postDataJSON } from '$root/services/httpClient.services';
-    import Preload from '$root/components/Preload.svelte';
-
+    import Preload from '$root/components/Preload.svelte';
     const DIAS = ['lun', 'mar', 'mie', 'jue', 'vie', 'sab', 'dom'] as const;
     const DIAS_TXT: Record<string, string> = {
         lun: 'Lunes', mar: 'Martes', mie: 'Miercoles', jue: 'Jueves',
         vie: 'Viernes', sab: 'Sabado', dom: 'Domingo'
     };
 
+    // El break es OPCIONAL, y la pantalla no lo muestra hasta que se pide.
+    //
+    // Casi todos los restaurantes tienen un solo turno corrido: se entra, se
+    // sale, listo. El que sale al mediodia y vuelve de noche es la excepcion, y
+    // no puede costarle a los demas catorce campos mas en pantalla.
+    //
+    // POR QUE SE PIDE EL BREAK Y NO DOS TURNOS
+    // Es la misma jornada descrita de dos maneras, pero no se entienden igual.
+    // "Entra 11, sale 23, break de 15 a 18" es como lo dice el dueno del local.
+    // "Trabaja 11-15 y 18-23" obliga a que la primera SALIDA signifique otra
+    // cosa que en los demas dias. Asi, entrada y salida siguen siendo la
+    // entrada y la salida del dia, y el break es un dato aparte.
+    //
+    // Es UNO para toda la semana, no uno por dia: nadie tiene un break distinto
+    // los martes, y siete pares de horas serian justo lo que se quiere evitar.
     type Tramo = { activo: boolean; e: string; s: string };
+    type Break = { hay: boolean; ini: string; fin: string };
+
+    /** Los tramos de un dia, venga guardado como tramo suelto o como lista. */
+    const tramosDe = (t: any): any[] => (t ? (Array.isArray(t) ? t : [t]) : []);
+
+    /** "08:00-17:00" o "11:00-15:00 y 18:00-23:00". */
+    const txtDia = (t: any): string =>
+        tramosDe(t).map((x: any) => `${x.e}-${x.s}`).join(' y ');
+
+    /** El break que sale de un horario ya guardado, si lo tiene. */
+    function breakDe(h: any): Break {
+        for (const d of DIAS) {
+            const ts = tramosDe(h?.[d]);
+            if (ts.length > 1) { return { hay: true, ini: ts[0].s, fin: ts[1].e }; }
+        }
+        return { hay: false, ini: '15:00', fin: '18:00' };
+    }
+
     const gridVacio = (h: any = null): Record<string, Tramo> => {
         const g: Record<string, Tramo> = {};
         for (const d of DIAS) {
-            const t = h?.[d];
-            g[d] = { activo: !!t, e: t?.e || '08:00', s: t?.s || '17:00' };
+            const ts = tramosDe(h?.[d]);
+            // Con break, la entrada y la salida del DIA son la del primer tramo
+            // y la del ultimo: el hueco del medio es el break.
+            g[d] = {
+                activo: ts.length > 0,
+                e: ts[0]?.e || '08:00',
+                s: (ts.length > 1 ? ts[ts.length - 1].s : ts[0]?.s) || '17:00'
+            };
         }
         return g;
     };
@@ -49,6 +87,7 @@
     // --- edicion individual ---
     let editando: any = null;
     let grid = gridVacio();
+    let brk: Break = { hay: false, ini: '15:00', fin: '18:00' };
     let tolerancia = 10;
     let guardando = false;
 
@@ -56,6 +95,7 @@
     let masivo = false;
     let alcance = 'todos';
     let gridMas = gridVacio();
+    let brkMas: Break = { hay: false, ini: '15:00', fin: '18:00' };
     let tolMas = 10;
 
     // --- confirmacion de dejar sin horario ---
@@ -95,32 +135,52 @@
             let j = i;
             while (j + 1 < DIAS.length) {
                 const sig = h[DIAS[j + 1]];
-                if (!sig || sig.e !== t.e || sig.s !== t.s) { break; }
+                if (!sig || txtDia(sig) !== txtDia(t)) { break; }
                 j++;
             }
             const etq = j > i ? `${DIAS_TXT[d].slice(0, 3)}-${DIAS_TXT[DIAS[j]].slice(0, 3)}` : DIAS_TXT[d].slice(0, 3);
-            partes.push(`${etq} ${t.e}-${t.s}`);
+            partes.push(`${etq} ${txtDia(t)}`);
             i = j + 1;
         }
         return partes.join(' · ') || 'Sin horario';
     }
 
     /** true si algun tramo cruza medianoche: cambia a que dia pertenece la salida. */
-    const cruzaMedianoche = (h: any) => !!h && DIAS.some(d => h[d] && h[d].s <= h[d].e);
+    const cruzaMedianoche = (h: any) =>
+        !!h && DIAS.some(d => tramosDe(h[d]).some((t: any) => t.s <= t.e));
 
     /**
      * Lee un grid y devuelve el horario, o el primer error encontrado.
      * Las mismas validaciones que el POS: si una puerta acepta lo que la otra
      * rechaza, el mismo dato queda distinto segun por donde se cargo.
      */
-    function leerGrid(g: Record<string, Tramo>): { horario: any; vacio: boolean; error: string } {
+    function leerGrid(g: Record<string, Tramo>, br: Break): { horario: any; vacio: boolean; error: string } {
         const horario: any = {};
         let err = '';
         for (const d of DIAS) {
             if (!g[d].activo) { continue; }
             if (!g[d].e || !g[d].s) { err = err || `Falta una hora en ${DIAS_TXT[d]}.`; continue; }
             if (g[d].e === g[d].s) { err = err || `En ${DIAS_TXT[d]} la entrada y la salida son iguales.`; continue; }
-            horario[d] = { e: g[d].e, s: g[d].s };
+
+            // Sin break: un solo tramo, exactamente como siempre.
+            if (!br.hay) { horario[d] = [{ e: g[d].e, s: g[d].s }]; continue; }
+
+            // Con break la jornada se parte en dos. Se valida con el dia en la
+            // mano para poder decir CUAL esta mal: el servidor tambien lo
+            // rechaza, pero ahi el mensaje ya no sabria de que dia hablar.
+            if (!br.ini || !br.fin) { err = err || 'Falta una hora del break.'; continue; }
+            if (br.ini === br.fin) { err = err || 'El break empieza y termina a la misma hora.'; continue; }
+            if (br.fin < br.ini) { err = err || 'El break termina antes de empezar.'; continue; }
+            if (g[d].s <= g[d].e) {
+                err = err || `${DIAS_TXT[d]} pasa la medianoche, y con break eso no se puede calcular.`;
+                continue;
+            }
+            if (br.ini <= g[d].e || br.fin >= g[d].s) {
+                err = err || `El break (${br.ini} a ${br.fin}) tiene que caer dentro del horario de ${DIAS_TXT[d]} (${g[d].e} a ${g[d].s}).`;
+                continue;
+            }
+
+            horario[d] = [{ e: g[d].e, s: br.ini }, { e: br.fin, s: g[d].s }];
         }
         return { horario, vacio: !Object.keys(horario).length, error: err };
     }
@@ -133,6 +193,7 @@
         editando = c;
         tolerancia = c.tolerancia_min ?? 10;
         grid = gridVacio(c.horario_semanal);
+        brk = breakDe(c.horario_semanal);
         aviso = '';
         error = '';
     }
@@ -148,7 +209,7 @@
     }
 
     async function guardar() {
-        const leido = leerGrid(grid);
+        const leido = leerGrid(grid, brk);
         if (leido.error) { error = leido.error; return; }
         if (!tolValida(tolerancia)) { error = 'La tolerancia debe estar entre 0 y 240 minutos.'; return; }
 
@@ -200,7 +261,7 @@
         : personal.filter(c => c.idarea === Number(alcance.split(':')[1])).length;
 
     async function guardarMasivo() {
-        const leido = leerGrid(gridMas);
+        const leido = leerGrid(gridMas, brkMas);
         if (leido.error) { error = leido.error; return; }
         if (!tolValida(tolMas)) { error = 'La tolerancia debe estar entre 0 y 240 minutos.'; return; }
         if (!alcanzados) { error = 'Ese grupo no tiene a nadie.'; return; }
@@ -364,6 +425,28 @@
                     </div>
                 {/each}
 
+                <!-- UN control para toda la semana. Cerrado ocupa una linea; las
+                     dos horas aparecen solo si se marca. -->
+                <label class="mt-3 flex items-center gap-2 text-sm">
+                    <input type="checkbox" bind:checked={brk.hay} />
+                    Sale a break y vuelve
+                    <span class="text-[11px] text-neutral-500">(por ejemplo, cierra a media tarde)</span>
+                </label>
+
+                {#if brk.hay}
+                    <div class="mt-1.5 pl-6">
+                        <div class="flex items-center gap-3">
+                            <span class="whitespace-nowrap text-sm text-neutral-600">Break de</span>
+                            <input type="time" bind:value={brk.ini} class="rounded-md border px-2 py-1 text-sm" />
+                            <span class="text-neutral-400">a</span>
+                            <input type="time" bind:value={brk.fin} class="rounded-md border px-2 py-1 text-sm" />
+                        </div>
+                        <p class="mt-1 text-[11px] text-neutral-500">
+                            Esas horas no se cuentan como trabajadas, y se aplican a todos los dias marcados.
+                        </p>
+                    </div>
+                {/if}
+
                 <button class="btn-link mt-3 text-xs text-sky-600 hover:underline" on:click={() => (grid = replicar(grid))}>
                     Usar el mismo horario en todos los dias marcados
                 </button>
@@ -440,6 +523,27 @@
                         {/if}
                     </div>
                 {/each}
+
+                <!-- El mismo control que en el individual, para que quien aprendio
+                     uno no tenga que volver a aprenderlo aca. -->
+                <label class="mt-3 flex items-center gap-2 text-sm">
+                    <input type="checkbox" bind:checked={brkMas.hay} />
+                    Salen a break y vuelven
+                </label>
+
+                {#if brkMas.hay}
+                    <div class="mt-1.5 pl-6">
+                        <div class="flex items-center gap-3">
+                            <span class="whitespace-nowrap text-sm text-neutral-600">Break de</span>
+                            <input type="time" bind:value={brkMas.ini} class="rounded-md border px-2 py-1 text-sm" />
+                            <span class="text-neutral-400">a</span>
+                            <input type="time" bind:value={brkMas.fin} class="rounded-md border px-2 py-1 text-sm" />
+                        </div>
+                        <p class="mt-1 text-[11px] text-neutral-500">
+                            Esas horas no se cuentan como trabajadas, y se aplican a todos los dias marcados.
+                        </p>
+                    </div>
+                {/if}
 
                 <button class="btn-link mt-3 text-xs text-sky-600 hover:underline" on:click={() => (gridMas = replicar(gridMas))}>
                     Usar el mismo horario en todos los dias marcados

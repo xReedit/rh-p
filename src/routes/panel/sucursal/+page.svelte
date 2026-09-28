@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { getValueToken, isLogin } from '$root/services/login.services'    
     import { goto } from "$app/navigation";   
-    import { fly } from 'svelte/transition'
+    import { fly, fade } from 'svelte/transition'
     import { postData, getData, putData } from '$root/services/httpClient.services'
     import Button from '$root/components/Button.svelte'
 	import Modal from '$root/components/Modal.svelte';
@@ -10,7 +10,8 @@
 	import Grid from "gridjs-svelte"  	
 	import { convertValuesUpperCase } from '$root/services/utils';
 	import { showToastSwal } from '$root/services/mi.swal';
-	import { h, html } from 'gridjs';
+	import { h, html } from 'gridjs';
+    import PanelHeader from '$root/components/PanelHeader.svelte';
 
     let idSede
     let isNewRegister = true
@@ -124,18 +125,13 @@
 </script>
 
 
-<div class="p-5" in:fly="{{ x: 200, duration: 200 }}">
-    <div class="flex justify-between items-end">
-        <div class="w-80">        
-            <p class="text-xl font-medium">Centro de Trabajo</p>
-            <p class="font-light text-sm text-gray-600">Lugar, ciudad o sucursal de trabajo.</p>
-        </div>
-        <div class="text-right w-40">
-            <Button icon="fa fa-arrow-left" color="secondary" on:click={goBack}>Atras</Button>
-            <Button icon="fa fa-plus" color="primary" on:click={()=>addSede()}>Agregar</Button>
-        </div>
-    </div>
-    <br>
+<div class="max-w-5xl m-auto p-4" in:fade>
+    <PanelHeader titulo="Centro de Trabajo"
+                 bajada="Lugar, ciudad o sucursal de trabajo."
+                 volverA="/panel">
+        <Button icon="fa fa-plus" color="primary" on:click={()=>addSede()}>Agregar</Button>
+    </PanelHeader>
+
 
     <Grid {data} {columns} language={es_La} sort search/>
 

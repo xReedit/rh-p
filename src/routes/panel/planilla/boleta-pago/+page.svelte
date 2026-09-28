@@ -38,10 +38,23 @@
     let dataSedePrincipal: any = {}
     let isPreloadShow = false
 
+    /** Se llego aqui sin decir de quien es la boleta ni de que periodo. */
+    let faltanDatos = false
+
     onMount(async () => {
         idOrg = getValueToken('idorg') 
         idColaborador = $page.url.searchParams.get('id') 
         periodo = $page.url.searchParams.get('periodo') 
+
+        // La boleta se abre desde la planilla del periodo, con la persona y el
+        // mes en la direccion. Un F5 o un enlace guardado llegan sin eso, y
+        // antes la pantalla se caia entera antes de dibujar nada: quedaba en
+        // blanco, sin una sola pista de que habia pasado.
+        if (!idColaborador || !periodo) {
+            faltanDatos = true
+            return
+        }
+
         nomPeriodo = getNomPerido(periodo);
 
         periodo = periodo +'-01' // el primer dia
@@ -323,6 +336,16 @@
 </script>
 <div class="p-5" in:fly="{{ x: 200, duration: 200 }}">  
     <Preload isLoading = {isPreloadShow}/>
+
+    {#if faltanDatos}
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <b>Falta elegir la boleta.</b>
+            <p class="mt-1 text-xs">
+                Una boleta se abre desde la planilla de un periodo, eligiendo a la persona.
+                <a class="font-semibold underline" href="/panel/planilla/list">Ir a la planilla</a>
+            </p>
+        </div>
+    {:else}
     <div class="pb-5 flex justify-between items-start">    
         <div>
             <h1 class="text-xl">Boleta de Pago</h1>
@@ -587,4 +610,5 @@
             </div>
         </svelte:fragment>
     </Modal>  
+    {/if}
 </div>

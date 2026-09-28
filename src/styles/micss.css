@@ -104,7 +104,8 @@
     }
 
     .btn {
-      @apply items-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm
+      @apply inline-flex items-center gap-1 rounded-md border border-transparent px-4 py-1.5 text-sm font-medium
+             shadow-sm transition-colors
     }
 
     .btn-sm {
@@ -114,11 +115,7 @@
     }
 
     .btn-primary {
-        @apply
-        bg-blue-600
-        hover:bg-blue-700
-        focus:bg-blue-700
-        text-white
+        @apply bg-sky-600 hover:bg-sky-700 focus:bg-sky-700 text-white
     }
 
     .btn-success {
@@ -130,11 +127,7 @@
     }
 
     .btn-secondary {
-      @apply
-      bg-gray-600
-      hover:bg-gray-700
-      focus:bg-gray-700
-      text-white
+      @apply bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50 shadow-none
     }
 
     .btn-default {

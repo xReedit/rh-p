@@ -2,13 +2,14 @@
     import { onMount } from 'svelte';
     import { getValueToken, isLogin } from '$root/services/login.services'    
     import { goto } from "$app/navigation";   
-    import { fly } from 'svelte/transition'
+    import { fly, fade } from 'svelte/transition'
     import { postData, getData } from '$root/services/httpClient.services'
     import Button from '$root/components/Button.svelte'
 	import Modal from '$root/components/Modal.svelte';
 	import { es_La } from '$root/services/es_La';
 	import Grid from "gridjs-svelte"  
-	import { h } from 'gridjs';
+	import { h } from 'gridjs';
+    import PanelHeader from '$root/components/PanelHeader.svelte';
 
     let showModal = false
     let descripcionRol = ''
@@ -84,18 +85,13 @@
 </script>
 
 
-<div class="p-5" in:fly="{{ x: 200, duration: 200 }}">
-    <div class="flex justify-between items-end">
-        <div class="w-80">        
-            <p class="text-xl font-medium">Roles</p>
-            <p class="font-light text-sm text-gray-600">Los roles son actividades que contribuyen a los objetivos de la empresa, como por ejemplo un Cocinero o un Mozo.</p>
-        </div>
-        <div class="text-right w-40">
-            <Button icon="fa fa-arrow-left" color="secondary" on:click={goBack}>Atras</Button>
-            <Button icon="fa fa-plus" color="primary" on:click={()=>handleToggleModal()}>Agregar</Button>
-        </div>
-    </div>
-    <br>
+<div class="max-w-4xl m-auto p-4" in:fade>
+    <PanelHeader titulo="Roles"
+                 bajada="Los roles son actividades que contribuyen a los objetivos de la empresa, como por ejemplo un Cocinero o un Mozo."
+                 volverA="/panel">
+        <Button icon="fa fa-plus" color="primary" on:click={()=>handleToggleModal()}>Agregar</Button>
+    </PanelHeader>
+
 
     <Grid {data} {columns} language={es_La} sort search/>
 

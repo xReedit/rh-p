@@ -1,5 +1,7 @@
 <script>
     import Button from '$root/components/Button.svelte'
+    import SedeEnBarra from '$root/components/SedeEnBarra.svelte'
+    import MenuSesion from '$root/components/MenuSesion.svelte'
 
 
     function edit() {
@@ -23,6 +25,11 @@
           <div class="flex-shrink-0">
             <img class="h-8" src="	https://papaya.com.pe/images/logo-white.png" alt="Your Company">
           </div>
+          <!-- El local en el que se trabaja. Al lado del logo y no en cada
+               pantalla: es un dato que no cambia al navegar. -->
+          <div class="ml-4">
+            <SedeEnBarra />
+          </div>
           <div class="hidden md:block">
             <!-- <div class="ml-10 flex items-baseline space-x-4">
                <p class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm">Recursos Humanos</p>
@@ -37,6 +44,7 @@
             </Button> -->
 
             <p class="text-zinc-100 font-medium subpixel-antialiased">Recursos Humanos</p>
+            <div class="ml-4"><MenuSesion /></div>
           </div>
         </div>        
       </div>

@@ -15,8 +15,7 @@
     import { fade } from 'svelte/transition';
     import { getData, postDataJSON } from '$root/services/httpClient.services';
     import Preload from '$root/components/Preload.svelte';
-    import AlertaAusencias from '$root/components/AlertaAusencias.svelte';
-
+    import AlertaAusencias from '$root/components/AlertaAusencias.svelte';
     let isPreloadShow = true;
     let error = '';
     let aviso = '';

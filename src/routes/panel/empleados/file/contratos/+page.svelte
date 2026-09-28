@@ -37,6 +37,9 @@
     let selectedUnidad = {}
     let isPreloadShow = false;
 
+    /** Se llego aqui sin decir de quien son los contratos. */
+    let sinEmpleado = false;
+
     onMount(async () => {    
         isPreloadShow = true;    
         idOrg = getValueToken('idorg')        
@@ -60,8 +63,29 @@
 
     async function getContratos() {
       idColaborador = $page.url.searchParams.get('id') || localStorage.getItem('sys::id');
-      listContratos = await getData('colaborador-contrato',`byIdColaborador/${idColaborador}`)      
 
+      // Sin empleado no hay nada que traer.
+      //
+      // Esta pantalla se abre desde la ficha de una persona, pero un F5 o un
+      // enlace guardado llegan sin el `id`. Antes se pedia igual
+      // (.../byIdColaborador/null), el servidor devolvia un error, y la
+      // respuesta -- que no es una lista -- reventaba el {#each} y dejaba la
+      // pantalla en blanco sin decir por que.
+      if (!idColaborador || idColaborador === 'null' || idColaborador === 'undefined') {
+        listContratos = [];
+        sinEmpleado = true;
+        // Se apaga el "Cargando" YA, sin esperar el segundo de cortesia: esa
+        // capa cubre toda la pantalla y se come el clic en el enlace que
+        // justamente le estamos ofreciendo.
+        isPreloadShow = false;
+        return;
+      }
+
+      const rpt = await getData('colaborador-contrato',`byIdColaborador/${idColaborador}`)
+
+      // Si el servidor devolvio cualquier otra cosa, se trata como vacio: mejor
+      // "no hay contratos" que una pantalla rota.
+      listContratos = Array.isArray(rpt) ? rpt : [];
 
       if ( listContratos.length === 0 ) {
         showBtnAdd = false
@@ -239,6 +263,18 @@
 
 <div class="m-5" in:fly="{{ x: 200, duration: 200 }}">
     <Preload isLoading = {isPreloadShow}/>
+
+    {#if sinEmpleado}
+        <!-- Se dice que falta y se ofrece el camino, en vez de dejar la
+             pantalla vacia y que la persona crea que se rompio. -->
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <b>Falta elegir de quien son los contratos.</b>
+            <p class="mt-1 text-xs">
+                Esta pantalla se abre desde la ficha de un empleado.
+                <a class="font-semibold underline" href="/panel/empleados/list">Ir a la lista de empleados</a>
+            </p>
+        </div>
+    {:else}
     
     <!-- lista de contratos -->
     <div class="flex items-center">
@@ -402,5 +438,6 @@
 
       </form>
     </div>
+    {/if}
 
 </div>

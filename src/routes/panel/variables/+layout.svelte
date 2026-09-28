@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { fly } from 'svelte/transition'
+    import { fly, fade } from 'svelte/transition'
     import AddVariable from '$root/components/Add-variable.svelte';
-	import {IdVariableStorage} from '$root/Store';
+	import {IdVariableStorage} from '$root/Store';
+    import PanelHeader from '$root/components/PanelHeader.svelte';
 
     let showModal = false    
     let idtipo_variable = 1
@@ -29,18 +30,13 @@
 
 </script>
 
-<div class="p-5" in:fly="{{ x: 200, duration: 200 }}">
-    <div class="flex justify-between items-center">
-        <div class="w-80">        
-            <p class="text-xl font-medium">Variables</p>
-            <p class="font-light text-sm text-gray-600">Variables para el cálculo de la remuneracón. Ingresos, Descuentos, Aportaciones.</p>
-        </div>
-        <div class="w-40 flex flex-wrap justify-end text-right">
-            <a class="btn btn-secondary" href="../"><i class="fa fa-arrow-left mr-1"></i> Atras</a>                        
-            <button class="btn btn-primary mt-2" on:click={openDialogAdd}><i class="fa fa-plus"></i>Agregar</button>
-        </div>
-    </div>
-    <br>
+<div class="max-w-4xl m-auto p-4" in:fade>
+    <PanelHeader titulo="Variables"
+                 bajada="Los conceptos con los que se calcula la remuneracion: ingresos, descuentos y aportaciones."
+                 volverA="/panel">
+        <button class="btn btn-primary" on:click={openDialogAdd}><i class="fa fa-plus"></i>Agregar</button>
+    </PanelHeader>
+
 
     <div class="tabs-group flex justify-between items-center">        
         <ul>

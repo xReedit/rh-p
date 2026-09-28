@@ -43,25 +43,49 @@
             const r = await getData('asistencia-rrhh', 'planilla/configuracion');
             if (!r?.success) { throw new Error(r?.error || 'No se pudo cargar'); }
             cfg = r.datos;
+            regimenGuardado = cfg.regimen_laboral;
         } catch (e: any) {
             error = e.message;
         }
     }
+
+    /**
+     * El regimen con el que se cargo la pantalla.
+     *
+     * Sirve para saber si el usuario lo CAMBIO en esta edicion. Si lo cambio,
+     * los interruptores los decide el servidor segun el regimen nuevo; si no,
+     * mandan los que estan en pantalla.
+     */
+    let regimenGuardado = '';
 
     async function guardar() {
         guardando = true;
         error = '';
         try {
             const cuerpo: any = {
+                regimen_laboral: cfg.regimen_laboral,
+                rmv: cfg.rmv,
                 frecuencia_pago: cfg.frecuencia_pago,
                 semana_empieza: cfg.semana_empieza
             };
-            for (const i of cfg.interruptores) { cuerpo[i.campo] = i.activo; }
+            // Los interruptores solo se mandan si el regimen NO cambio. Si
+            // cambio, manda el regimen: mandarlos tambien pisaria lo que el
+            // servidor acaba de acomodar segun la Ley MYPE.
+            if (cfg.regimen_laboral === regimenGuardado) {
+                for (const i of cfg.interruptores) { cuerpo[i.campo] = i.activo; }
+            }
+            cuerpo.sobretiempo_min_umbral = cfg.sobretiempo_min_umbral;
 
             const r = await postDataJSON('asistencia-rrhh', 'planilla/configuracion', cuerpo);
             if (!r?.success) { throw new Error(r?.error || 'No se pudo guardar'); }
             cfg = r.datos;
-            aviso = 'Configuracion guardada.';
+            // Si el regimen cambio, el servidor acomodo los interruptores: se
+            // avisa, porque si no parece que la pantalla se movio sola.
+            const acomodo = regimenGuardado && regimenGuardado !== cfg.regimen_laboral;
+            regimenGuardado = cfg.regimen_laboral;
+            aviso = acomodo
+                ? 'Configuracion guardada. Se ajustaron CTS, gratificaciones y EsSalud a lo que corresponde al regimen elegido.'
+                : 'Configuracion guardada.';
         } catch (e: any) {
             error = e.message;
         }
@@ -94,7 +118,47 @@
     {#if cfg}
         <!-- 1 -->
         <div class="mb-5 rounded-lg border p-4">
-            <p class="mb-1 text-sm font-semibold">1. Cada cuanto se paga</p>
+            <p class="mb-1 text-sm font-semibold">1. Que regimen es tu empresa</p>
+            <p class="mb-3 text-xs text-neutral-500">
+                Lo dice tu ficha del REMYPE. De esto depende que beneficios corresponden:
+                no es una eleccion, lo fija la Ley MYPE.
+            </p>
+
+            <div class="grid gap-2 md:grid-cols-3">
+                {#each cfg.regimenes as reg}
+                    <label class="cursor-pointer rounded-lg border p-3 text-sm
+                                  {cfg.regimen_laboral === reg.clave ? 'border-sky-500 bg-sky-50' : 'hover:bg-neutral-50'}">
+                        <span class="flex items-center gap-2">
+                            <input type="radio" bind:group={cfg.regimen_laboral} value={reg.clave} />
+                            <b class="font-medium">{reg.titulo}</b>
+                        </span>
+                        <span class="mt-1 block text-xs text-neutral-500">{reg.ayuda}</span>
+                    </label>
+                {/each}
+            </div>
+
+            {#if cfg.regimen_laboral !== regimenGuardado}
+                <p class="mt-3 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
+                    Al guardar se van a ajustar <b>CTS</b>, <b>gratificaciones</b> y <b>EsSalud</b>
+                    a lo que corresponde a este regimen.
+                </p>
+            {/if}
+
+            <div class="mt-4 flex items-center gap-2 border-t pt-3 text-sm">
+                <label for="rmv">Remuneracion minima vigente</label>
+                <span class="text-neutral-500">S/</span>
+                <input id="rmv" type="number" min="1" step="10" bind:value={cfg.rmv}
+                       class="w-28 rounded-md border px-2 py-1 text-sm" />
+            </div>
+            <p class="mt-1 text-xs text-neutral-500">
+                Se usa para avisar cuando un sueldo queda por debajo del minimo. Cambia por
+                decreto: actualizalo aqui el dia que suba, sin esperar una actualizacion del sistema.
+            </p>
+        </div>
+
+        <!-- 2 -->
+        <div class="mb-5 rounded-lg border p-4">
+            <p class="mb-1 text-sm font-semibold">2. Cada cuanto se paga</p>
             <p class="mb-3 text-xs text-neutral-500">
                 Define los periodos que se pueden cerrar. Cambiarlo no altera lo que ya se pago.
             </p>
@@ -132,20 +196,43 @@
 
         <!-- 2 -->
         <div class="mb-5 rounded-lg border p-4">
-            <p class="mb-1 text-sm font-semibold">2. Que tan formal es la planilla</p>
+            <p class="mb-1 text-sm font-semibold">3. Que tan formal es la planilla</p>
             <p class="mb-3 text-xs text-neutral-500">
                 Todo apagado es lo mas simple: sabes cuanto le pagas a cada uno y le imprimes su boleta.
                 Enciende solo lo que uses. Apagar algo esconde sus conceptos, no borra nada.
             </p>
 
             {#each cfg.interruptores as i}
-                <label class="flex cursor-pointer items-start gap-3 border-b py-3 text-sm last:border-0">
-                    <input type="checkbox" bind:checked={i.activo} class="mt-0.5" />
-                    <span class="flex-1">
-                        <b class="font-medium">{i.titulo}</b>
-                        <span class="block text-xs text-neutral-500">{i.ayuda}</span>
-                    </span>
-                </label>
+                <div class="border-b py-3 last:border-0">
+                    <label class="flex cursor-pointer items-start gap-3 text-sm">
+                        <input type="checkbox" bind:checked={i.activo} class="mt-0.5" />
+                        <span class="flex-1">
+                            <b class="font-medium">{i.titulo}</b>
+                            <span class="block text-xs text-neutral-500">{i.ayuda}</span>
+                        </span>
+                    </label>
+
+                    <!-- El umbral va pegado a SU interruptor y solo si esta
+                         encendido: suelto en la pantalla no se entiende de que
+                         habla, y apagado no sirve para nada. -->
+                    {#if i.clave === 'sobretiempo' && i.activo}
+                        <div class="mt-2 ml-7 rounded-md bg-neutral-50 p-3">
+                            <label class="flex items-center gap-2 text-sm" for="umbral">
+                                No contar como hora extra hasta
+                                <input id="umbral" type="number" min="0" max="120"
+                                       bind:value={cfg.sobretiempo_min_umbral}
+                                       class="w-20 rounded-md border px-2 py-1 text-sm" />
+                                minutos
+                            </label>
+                            <p class="mt-1 text-xs text-neutral-500">
+                                En un restaurante la gente llega antes y se queda despues. Sin este
+                                margen, cinco minutos de anticipacion todos los dias serian horas
+                                extra todos los dias. Pasado el margen se paga <b>todo</b> el exceso,
+                                no el exceso menos estos minutos.
+                            </p>
+                        </div>
+                    {/if}
+                </div>
             {/each}
 
             <p class="mt-3 text-xs text-neutral-500">

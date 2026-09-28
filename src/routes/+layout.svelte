@@ -1,7 +1,19 @@
 <script>
+    // micss.css VA PRIMERO, y no es cosmetico.
+    //
+    // Los dos archivos empiezan con `@tailwind base`, asi que el "preflight" de
+    // Tailwind sale duplicado. Entre sus reglas esta:
+    //     button,[type=button],[type=submit] { background-color: transparent }
+    // que pesa lo mismo que una utilidad como `bg-sky-600` -- y en un empate
+    // gana la que va ultima. Con micss.css al final, su copia del preflight
+    // quedaba despues de las utilidades y le borraba el fondo a TODO boton
+    // `type="submit"`: el de Entrar salia en blanco, con el texto blanco
+    // encima y por lo tanto invisible.
+    //
+    // Poniendolo primero, las utilidades vuelven a ser las ultimas y ganan.
+    import '$root/styles/micss.css';
     import "../app.css";
     import '$root/js/all.min.js';
-    import '$root/styles/micss.css';
     import Toolbar from '$root/components/Toolbar.svelte'       
 
 </script>

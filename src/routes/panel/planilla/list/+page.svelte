@@ -5,9 +5,10 @@
     import { es_La } from '$root/services/es_La';
 	import { getValueToken } from "$root/services/login.services";
 	import { getData } from "$root/services/httpClient.services";
-	import { fly } from "svelte/transition";
+	import { fade } from "svelte/transition";
 	import { exportTableToExcel, formatCurrency, removeComaNum } from "$root/services/utils";
 	import { goto } from "$app/navigation";
+    import PanelHeader from '$root/components/PanelHeader.svelte';
 
         
     let keyStoragePeriodo = 'sys::periodo'
@@ -145,33 +146,30 @@
     }
 
 </script>
-<div class="p-5" in:fly="{{ x: 200, duration: 200 }}">
-    <div class="flex justify-between items-end">
-        <div class="w-90">        
-            <p class="text-xl font-medium">Planilla</p>            
-            <p class="font-light text-sm text-gray-600"><span class="badge primary"> Lista de colaboradores que tienen un contrato, en el periodo seleccionado.</span></p>
-            
-            <div class="w-40 mt-2">
-                <label class="font-light text-sm text-gray-600" for="month-periodo">Seleccione Periodo:</label>
-                <input type="month" id="month-periodo" bind:value={dateNowPeriodo} on:change={changeDatePeriodo}>
-            </div>
-            <a class="mt-1 inline-block text-xs text-sky-600 hover:underline" href="/panel/planilla/configuracion">
-                <i class="fa-solid fa-gear"></i> Configuracion de planilla
-            </a>
+<div class="max-w-6xl m-auto p-4" in:fade>
+    <PanelHeader titulo="Planilla"
+                 bajada="Los colaboradores con contrato vigente en el periodo seleccionado."
+                 volverA="/panel">
+        <button class="btn btn-success" on:click={() => descargarTablaExcel()}>
+            <i class="fa fa-table"></i> Descargar
+        </button>
+    </PanelHeader>
+
+    <!-- El periodo manda sobre toda la pantalla, asi que va arriba de la
+         tabla y no escondido dentro del titulo. -->
+    <div class="mb-4 flex flex-wrap items-end gap-3 rounded-lg border bg-neutral-50 p-3">
+        <div>
+            <label class="mb-1 block text-[11px] font-semibold uppercase text-neutral-500"
+                   for="month-periodo">Periodo</label>
+            <input type="month" id="month-periodo" class="w-44 rounded-md border px-3 py-1.5 text-sm"
+                   bind:value={dateNowPeriodo} on:change={changeDatePeriodo}>
         </div>
-        <div class="flex flex-wrap justify-end text-right">
-            <div class="flex">
-                <button class="btn btn-success mr-1" on:click={() => descargarTablaExcel()}><i class="fa fa-table"></i> Descargar</button>
-                <a class="btn btn-secondary" href="../">
-                    <i class="fa fa-arrow-left mr-1"></i>
-                    Atras
-                </a>                                
-            </div>
-        </div>
+        <span class="flex-1"></span>
+        <a class="pb-2 text-xs text-sky-600 hover:underline" href="/panel/planilla/configuracion">
+            <i class="fa-solid fa-gear"></i> Configuracion de planilla
+        </a>
     </div>
-</div>
-<hr>
-<div class="p-5" in:fly="{{ x: 200, duration: 200 }}">  
+  
 
     <table class="fs-12" id="tabla-planilla">
         <thead>

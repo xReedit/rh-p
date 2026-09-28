@@ -36,6 +36,16 @@
         </a>
 
         <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <a href="../panel/usuarios" class="w-60 border-2 rounded-lg m-2 p-3 text-left hover:shadow hover:bg-slate-50 cursor-pointer">
+            <div class="flex items-center">
+                <div class="bg-emerald-300 p-1 rounded text-center mr-1">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <p class="title font-medium text-lg">Usuarios y accesos</p>
+            </div>
+            <p class="font-light text-sm">Que locales ve y edita cada persona en Recursos Humanos.</p>
+        </a>
+
         <a href="../panel/roles" class="w-60 border-2 rounded-lg m-2 p-3 text-left hover:shadow hover:bg-slate-50 cursor-pointer">
             <div class="flex items-center">
                 <div class="bg-yellow-300 p-1 rounded text-center mr-1">
@@ -55,6 +65,17 @@
                 <p class="title font-medium">Gestión de Planilla</p>
             </div>
             <p class="font-light text-sm">Gestione sus pagos, adelantos, descuentos, imprimir boletas de pago.</p>
+        </a>
+
+        <a href="../panel/planilla/costo" class="w-60 border-2 rounded-lg m-2 p-3 text-left hover:shadow hover:bg-slate-50 cursor-pointer">
+
+            <div class="flex items-center">
+                <div class="bg-emerald-300 p-1 rounded text-center mr-1">
+                    <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+                <p class="title font-medium">Costo de personal</p>
+            </div>
+            <p class="font-light text-sm">Cuanto le sale al negocio el personal de cada periodo, y en que area se va.</p>
         </a>
 
         <a href="../panel/variables/ingresos" class="w-60 border-2 rounded-lg m-2 p-3 text-left hover:shadow hover:bg-slate-50 cursor-pointer">

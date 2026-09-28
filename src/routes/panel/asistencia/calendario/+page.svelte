@@ -15,8 +15,7 @@
     import { goto } from '$app/navigation';
     import { fade } from 'svelte/transition';
     import { getData, postDataJSON, deleteData } from '$root/services/httpClient.services';
-    import Preload from '$root/components/Preload.svelte';
-
+    import Preload from '$root/components/Preload.svelte';
     const DIAS = ['lun', 'mar', 'mie', 'jue', 'vie', 'sab', 'dom'] as const;
     const DIAS_TXT: Record<string, string> = {
         lun: 'Lunes', mar: 'Martes', mie: 'Miercoles', jue: 'Jueves',
@@ -231,7 +230,12 @@
         try {
             const r = await getData('asistencia-rrhh', 'configuracion');
             if (!r?.success) { throw new Error(r?.error || 'No se pudo cargar la configuracion'); }
-            cfg = { ...r.datos, feriado_extra: r.datos.feriado_recargo_pct > 0 };
+            cfg = {
+                ...r.datos,
+                feriado_extra: r.datos.feriado_recargo_pct > 0,
+                marcador_auto: r.datos.marcador_personas === null || r.datos.marcador_personas === undefined
+            };
+            if (!cfg.marcador_personas) { cfg.marcador_personas = r.datos.marcador_personas_auto || 15; }
             if (!cfg.feriado_recargo_pct) { cfg.feriado_recargo_pct = 100; }
             cierreSel = {};
             for (const d of DIAS) { cierreSel[d] = r.datos.dias_cierre.includes(d); }
@@ -261,7 +265,9 @@
                 // el extra no depende de cuantos se abran.
                 feriado_recargo_pct: cfg.feriado_extra ? Number(cfg.feriado_recargo_pct) : 0,
                 descanso_trabajado: cfg.descanso_trabajado,
-                descanso_recargo_pct: Number(cfg.descanso_recargo_pct)
+                descanso_recargo_pct: Number(cfg.descanso_recargo_pct),
+                // null = automatico: el servidor cuenta el personal cargado
+                marcador_personas: cfg.marcador_auto ? null : Number(cfg.marcador_personas)
             });
             if (!r?.success) { throw new Error(r?.error || 'No se pudo guardar'); }
             aviso = 'Configuracion guardada.';
@@ -589,6 +595,31 @@
                             ? 'El marcador acepta la marca y la registra como dia pagado doble. Entra a la boleta sin que nadie haga nada.'
                             : 'El marcador rechaza la marca y avisa que hay que habilitar el dia. Lo habilita el administrador desde el propio marcador o desde aqui.'}
                     </p>
+
+                    <p class="mb-1 mt-5 text-sm font-semibold">4. Cuanta gente marca en este local</p>
+                    <p class="mb-2 text-xs text-neutral-500">
+                        El marcador limita cuantos intentos acepta por minuto para que nadie pueda saturarlo.
+                        Como todas las marcas del local salen por la misma conexion, ese limite depende de
+                        cuanta gente marca a la vez. Dejalo en automatico salvo que el marcador este
+                        rechazando marcas en la hora de salida.
+                    </p>
+                    <label class="flex items-center gap-2 py-1 text-sm">
+                        <input type="radio" bind:group={cfg.marcador_auto} value={true} />
+                        Automatico
+                        {#if cfg.marcador_personas_auto}
+                            <span class="text-xs text-neutral-500">({cfg.marcador_personas_auto} personas cargadas)</span>
+                        {/if}
+                    </label>
+                    <label class="flex items-center gap-2 py-1 text-sm">
+                        <input type="radio" bind:group={cfg.marcador_auto} value={false} /> Indicar un numero
+                    </label>
+                    {#if !cfg.marcador_auto}
+                        <div class="ml-6 flex items-center gap-2">
+                            <input type="number" min="1" max="300" bind:value={cfg.marcador_personas}
+                                   class="w-20 rounded-md border px-2 py-1 text-sm" />
+                            <span class="text-xs text-neutral-500">personas</span>
+                        </div>
+                    {/if}
                 </div>
                 <div class="flex justify-end gap-2 border-t p-4">
                     <button class="rounded-md px-4 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100"
